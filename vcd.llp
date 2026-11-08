@@ -1,0 +1,63 @@
+
+regSStatement = \$[a-z]+
+regSScope     = \$scope
+regSEnd       = \$end
+regSVar       = \$var
+regSscope     = \$scope
+regSDumpvars  = \$dumpvars
+regSDumpall   = \$dumpall
+regSDate      = \$date
+regSVersion   = \$version
+regSTimescale = \$timescale
+regSUpscope   = \$upscope
+regSDumpAll   = \$dumpall
+regSComment   = \$comment
+regSEnddefinitions = \$enddefinitions
+
+regRegion    = [^\$]+
+regBinary    = b[01xz]+\s
+charNewLine  = \n
+charBinValue = [01xz]
+regTimestep  = \#[0-9]+
+regNumber    = [0-9]+
+regSpace     = [\s\n\r\t]*
+regRange     = \[[0-9]+\:[0-9]+\]
+regTillLine  = [^\n]*\n
+regWord      = [^\n\r\t\s]+
+
+
+HeadDate      > regSDate.      regRegion regSEnd.
+HeadVersion   > regSVersion.   regRegion regSEnd.
+HeadComment   > regSComment.   regRegion regSEnd.
+// TODO Make filter here!
+HeadTimescale > regSTimescale. regRegion regSEnd.
+HeadEndDef    > regSEnddefinitions. regSpace. regSEnd.
+
+
+HeadDumpAll   > regSDumpall. regSpace. regSEnd. regSpace. HeadDump*#
+HeadDump      > HeadTimeStep   HeadTimeStep? HeadTimeStep? HeadDump*?
+HeadDump      > regSStatement. HeadTimeStep? HeadTimeStep? HeadDump*?
+
+HeadTimeStep  > regTimestep     regSpace.                     BodyTimeStep
+BodyTimeStep  > BodyDump        regSpace. BodyDump? regSpace. BodyDump? regSpace. BodyTimeStep*?
+BodyTimeStep  > BodyDumpIgnore. regSpace. BodyDump? regSpace. BodyDump? regSpace. BodyTimeStep*?
+
+BodyDump       > regBinary     regWord
+BodyDump       > charBinValue  regWord
+BodyDumpIgnore > regSStatement. regSpace.
+
+HeadScope     > regSScope. regSpace. ScopeModule regSEnd. regSpace. BodyScope? regSUpscope. regSpace. regSEnd.
+BodyScope     > regSVar. regSpace. ScopeNewVar regSpace. regSEnd. regSpace. BodyScope*?
+BodyScope     > HeadScope regSpace. BodyScope*?
+
+ScopeModule   > regWord regSpace. regWord regSpace.
+ScopeNewVar > regWord regSpace. regNumber regSpace. regWord regSpace. regWord regSpace. regRange? regSpace.?
+
+_ > Start
+Start > HeadVersion   regSpace. Start*?
+Start > HeadDate      regSpace. Start*?
+Start > HeadTimescale regSpace. Start*?
+Start > HeadScope     regSpace. Start*?
+Start > HeadComment   regSpace. Start*?
+Start > HeadEndDef    regSpace. Start*?
+Start > HeadDumpAll   regSpace. Start*?
