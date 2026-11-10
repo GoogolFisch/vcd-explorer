@@ -15,7 +15,7 @@ regSComment   = \$comment
 regSEnddefinitions = \$enddefinitions
 
 regRegion    = [^\$]+
-regBinary    = b[01xz]+\s
+regBinary    = b[01xz]+
 charNewLine  = \n
 charBinValue = [01xz]
 regTimestep  = \#[0-9]+
@@ -42,9 +42,9 @@ HeadTimeStep  > regTimestep     regSpace.                     BodyTimeStep
 BodyTimeStep  > BodyDump        regSpace. BodyDump? regSpace. BodyDump? regSpace. BodyTimeStep*?
 BodyTimeStep  > BodyDumpIgnore. regSpace. BodyDump? regSpace. BodyDump? regSpace. BodyTimeStep*?
 
-BodyDump       > regBinary     regWord
-BodyDump       > charBinValue  regWord
-BodyDumpIgnore > regSStatement. regSpace.
+BodyDump       > regBinary regSpace. regWord
+BodyDump       > charBinValue        regWord
+BodyDumpIgnore > regSStatement.      regSpace.
 
 HeadScope     > regSScope. regSpace. ScopeModule regSEnd. regSpace. BodyScope? regSUpscope. regSpace. regSEnd.
 BodyScope     > regSVar. regSpace. ScopeNewVar regSpace. regSEnd. regSpace. BodyScope*?

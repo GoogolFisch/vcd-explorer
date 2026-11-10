@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import struct
 import termios, fcntl, sys, os
 fd = sys.stdin.fileno()
 
@@ -47,27 +48,208 @@ def canCancelInput(prompt:str=":",history=list(),complete=None)->str|None:
                 prefix = prefix[:-1]
                 print(end=f"\b{suffix} \b" + "\b" * len(suffix),flush=True)
         elif(c == "\t" and complete is not None):
-            prefix = complete(prefix,suffix)
+            print(end="\b"*len(prefix))
+            (prefix,suffix) = complete(prefix,suffix)
+            print(end=prefix+suffix+"\b"*len(suffix),flush=True)
         elif(c.startswith("\x1b")):pass
         elif(ord(c[0]) >= 0x20):
-            print(end=f"{c}{suffix}" + "\b" * len(suffix),flush=True)
+            print(end=f"{c}{suffix}  \b\b" + "\b" * len(suffix),flush=True)
             prefix += c
     return prefix + suffix
 
 def gotoPlace(x,y):
     print(end=f"\x1b[{y};{x}H")#]
+def clear():
+    gotoPlace(1,1)
+    print(end=f"\x1b[0J",flush=True)#]
+
+def makeAsLength(data,length):
+    data = data[:length]
+    while(len(data) < length):
+        data = " " + data
+    return data
+
+def bin2ColorHex(bin,length:int=128):
+    lookup = "0123456789ABCDEF"
+    outp = ""
+    counter = 0
+    myLength = 0
+    value = 0
+    isRed = "\x1b[0m"#]
+    while len(bin) > 0 and length > myLength:
+        ch = bin[-1]
+        bin = bin[:-1]
+        #
+        value += (ch == "1") << (counter % 4)
+        if(ch not in "01"):isRed = "\x1b[31m"#]
+        counter += 1
+        #
+        if(counter == 4):
+            myLength += 1
+            outp = isRed + lookup[value] + outp
+            counter = value = 0
+    if(counter > 0):
+        outp = lookup[value] + outp
+        myLength += 1
+    while(myLength < length):
+        outp = " " + outp
+        myLength += 1
+    return outp
+
+
+
+class Position:
+    __slots__ = ("x","y")
+    def __init__(self,x,y):
+        self.x = x
+        self.y = y
+
+
+class App:
+    nameLength = 9
+    __slots__ = ("data","fileName","wires","staticWires","position","error")
+    def __init__(self):
+        self.data = None
+        self.fileName = ""
+        self.wires = list()
+        self.staticWires = list()
+        self.position = Position(0,0)
+        self.error = None
+        self.redraw()
+
+    def openNewFile(self,fname):
+        try:
+            with open(fname,"r")as fptr:
+                data = fptr.read()
+        except:
+            self.error = "Error during the opening of a file"
+            return
+        self.error = None
+        self.fileName = fname
+        self.data = struct.doParse(data)
+        self.position = Position(0,0)
+        self.staticWires = list()
+        self.wires = list()
+
+    def getInputCmd(self):
+        gotoPlace(1,1)
+        command = canCancelInput(":")
+        if(command is None):return
+        if(command.startswith("o ")):
+            self.openNewFile(command[2:])
+
+    def getAddWire(self):
+        if(self.data is None):
+            self.error = "You need to open a file!"
+            return
+        def _getAddWire(pre:str,suf:str)->(str,str):
+            if(pre.startswith(".")):
+                pup = pre[1:]
+                found = pre
+                length = 999
+                for x in self.data.longMap:
+                    if(length > len(x) and x.endswith(pup)):
+                        found = x
+                        length = len(x)
+                return found,suf
+            return pre,suf
+        gotoPlace(1,1)
+        wireName = canCancelInput("+",complete=_getAddWire)
+        self.wires.append(tuple(wireName.split(".")))
+
+    def run(self,input:str):
+        if(len(input) == 0):return True
+        didConsume = False
+        step = 1
+        if(len(input) == 1 and ord("A") <= ord(input) <= ord("Z")):
+            step = 10
+        doRedraw = False
+        if(input in ("0",               )): self.position.x  = 0   ;doRedraw = True
+        if(input in ("l","L",     "\x06")): self.position.x += step;doRedraw = True
+        if(input in ("h","H",     "\x02")): self.position.x -= step;doRedraw = True
+        if(input in ("k","K","\n","\x0e")): self.position.y += step;doRedraw = True
+        if(input in ("j","J",     "\x10")): self.position.y -= step;doRedraw = True
+        if(input == ":"): self.getInputCmd(); doRedraw = True
+        if(input == "+"): self.getAddWire(); doRedraw = True
+        if(doRedraw):
+            self.doClip()
+            self.redraw()
+        didConsume |= doRedraw
+        return didConsume
+
+
+    def doClip(self):
+        if(self.position.x < 0):
+            self.position.x = 0
+        if(self.position.y < 0):
+            self.position.y = 0
+        if(self.position.x > self.data.stamps[-1].stamp):
+            self.position.x = self.data.stamps[-1].stamp
+
+    def redraw(self):
+        tsize = os.get_terminal_size()
+        if(self.error is not None):
+            gotoPlace(1,1)
+            print(error)
+        if(self.data == None):
+            gotoPlace(1,1)
+            print("You need to open a file!")
+            return
+        goDown = 2
+        gotoPlace(1,goDown)
+        print(end=f"{self.fileName}  {self.data.info.date}  "
+                  f"{self.data.info.version}  {self.data.info.timescale}  "
+                  f"{self.data.stamps[-1].stamp}")
+        goDown += 1
+        for wire in self.staticWires:
+            if(goDown > tsize.lines):return
+            gotoPlace(1,goDown)
+            print(end=f"*{makeAsLength(wire[-1],App.nameLength - 2)} ")
+            self.drawForWire(wire,tsize)
+            goDown += 1
+
+        for idx,wire in enumerate(self.wires):
+            if(idx < self.position.y):continue
+            if(goDown > tsize.lines):return
+            gotoPlace(1,goDown)
+            print(end=f"{makeAsLength(wire[-1],App.nameLength - 1)} ")
+            self.drawForWire(wire,tsize)
+            goDown += 1
+
+        print(end="",flush=True)
+
+    def drawForWire(self,wire:tuple,tsize:os.terminal_size):
+        nameWire = ".".join(wire)
+        wireBase = self.data.longMap.get(nameWire,None)
+        if(wireBase is None):
+            print(end="?")
+            return
+        idx = 0
+        oldBase = None
+        for stamp in range(self.position.x,self.position.x + (tsize.columns - App.nameLength)//5):
+            while(idx < len(wireBase.assign) and wireBase.assign[idx].time.stamp <= stamp):
+                idx += 1
+            if(idx > len(wireBase.assign)):break
+            base = wireBase.assign[idx-1]
+            if(oldBase is not base):
+                print(end="|")
+            else:
+                print(end=" ")
+            print(end=bin2ColorHex(base.value,4))
+            oldBase = base
 
 
 
 try:
+    clear()
+    a = App()
+    if(len(sys.argv) > 1):
+        a.openNewFile(sys.argv[1])
+    a.redraw()
     while 1:
         try:
             c = sys.stdin.read(1)
-            if(len(c) == 1 and c in ":+-/"):
-                gotoPlace(1,1)
-                print(end="\x1b[2K")#]
-                print(canCancelInput(c))
-            elif c:
+            if(not a.run(c)):
                 print("Got character", repr(c))
         except IOError: pass
 finally:

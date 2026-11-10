@@ -746,314 +746,313 @@ class Parser:
       offset += 1
       _x9d=True
     if(not _x9d):return None
-    _x9e = False
-    if(len(data) > offset and ord(data[offset]) == 32):_x9e = True
-    if(_x9e and offset < len(data)):offset += 1
-    else:return None
     return Node.fromRange(data,"regBinary",loc,offset)
   def _charNewLine16(data:str,loc:Location):
     offset = loc.idx
-    _x9f = False
-    if(len(data) > offset and ord(data[offset]) == 10):_x9f = True
-    if(_x9f and offset < len(data)):offset += 1
+    _x9e = False
+    if(len(data) > offset and ord(data[offset]) == 10):_x9e = True
+    if(_x9e and offset < len(data)):offset += 1
     else:return None
     return Node.fromRange(data,"charNewLine",loc,offset)
   def _charBinValue17(data:str,loc:Location):
     offset = loc.idx
-    _xa0 = False
-    if(len(data) > offset and ord(data[offset]) >= 48 and ord(data[offset]) < 50):_xa0 = True
-    elif(len(data) > offset and ord(data[offset]) == 120):_xa0 = True
-    elif(len(data) > offset and ord(data[offset]) == 122):_xa0 = True
-    if(_xa0 and offset < len(data)):offset += 1
+    _x9f = False
+    if(len(data) > offset and ord(data[offset]) >= 48 and ord(data[offset]) < 50):_x9f = True
+    elif(len(data) > offset and ord(data[offset]) == 120):_x9f = True
+    elif(len(data) > offset and ord(data[offset]) == 122):_x9f = True
+    if(_x9f and offset < len(data)):offset += 1
     else:return None
     return Node.fromRange(data,"charBinValue",loc,offset)
   def _regTimestep18(data:str,loc:Location):
     offset = loc.idx
-    _xa1 = False
-    if(len(data) > offset and ord(data[offset]) == 35):_xa1 = True
-    if(_xa1 and offset < len(data)):offset += 1
+    _xa0 = False
+    if(len(data) > offset and ord(data[offset]) == 35):_xa0 = True
+    if(_xa0 and offset < len(data)):offset += 1
     else:return None
-    _xa3 = False
+    _xa2 = False
     while(True):
-      _xa2 = False
-      if(len(data) > offset and ord(data[offset]) >= 48 and ord(data[offset]) < 58):_xa2 = True
-      if(not _xa2 or offset >= len(data)):break
+      _xa1 = False
+      if(len(data) > offset and ord(data[offset]) >= 48 and ord(data[offset]) < 58):_xa1 = True
+      if(not _xa1 or offset >= len(data)):break
       offset += 1
-      _xa3=True
-    if(not _xa3):return None
+      _xa2=True
+    if(not _xa2):return None
     return Node.fromRange(data,"regTimestep",loc,offset)
   def _regNumber19(data:str,loc:Location):
     offset = loc.idx
-    _xa5 = False
+    _xa4 = False
     while(True):
-      _xa4 = False
-      if(len(data) > offset and ord(data[offset]) >= 48 and ord(data[offset]) < 58):_xa4 = True
-      if(not _xa4 or offset >= len(data)):break
+      _xa3 = False
+      if(len(data) > offset and ord(data[offset]) >= 48 and ord(data[offset]) < 58):_xa3 = True
+      if(not _xa3 or offset >= len(data)):break
       offset += 1
-      _xa5=True
-    if(not _xa5):return None
+      _xa4=True
+    if(not _xa4):return None
     return Node.fromRange(data,"regNumber",loc,offset)
   def _regSpace20(data:str,loc:Location):
     offset = loc.idx
     while(True):
-      _xa6 = False
-      if(len(data) > offset and ord(data[offset]) >= 9 and ord(data[offset]) < 11):_xa6 = True
-      elif(len(data) > offset and ord(data[offset]) == 13):_xa6 = True
-      elif(len(data) > offset and ord(data[offset]) == 32):_xa6 = True
-      if(not _xa6 or offset >= len(data)):break
+      _xa5 = False
+      if(len(data) > offset and ord(data[offset]) >= 9 and ord(data[offset]) < 11):_xa5 = True
+      elif(len(data) > offset and ord(data[offset]) == 13):_xa5 = True
+      elif(len(data) > offset and ord(data[offset]) == 32):_xa5 = True
+      if(not _xa5 or offset >= len(data)):break
       offset += 1
     return Node.fromRange(data,"regSpace",loc,offset)
   def _regRange21(data:str,loc:Location):
     offset = loc.idx
-    _xa7 = False
-    if(len(data) > offset and ord(data[offset]) == 91):_xa7 = True
-    if(_xa7 and offset < len(data)):offset += 1
+    _xa6 = False
+    if(len(data) > offset and ord(data[offset]) == 91):_xa6 = True
+    if(_xa6 and offset < len(data)):offset += 1
     else:return None
+    _xa8 = False
+    while(True):
+      _xa7 = False
+      if(len(data) > offset and ord(data[offset]) >= 48 and ord(data[offset]) < 58):_xa7 = True
+      if(not _xa7 or offset >= len(data)):break
+      offset += 1
+      _xa8=True
+    if(not _xa8):return None
     _xa9 = False
-    while(True):
-      _xa8 = False
-      if(len(data) > offset and ord(data[offset]) >= 48 and ord(data[offset]) < 58):_xa8 = True
-      if(not _xa8 or offset >= len(data)):break
-      offset += 1
-      _xa9=True
-    if(not _xa9):return None
-    _xaa = False
-    if(len(data) > offset and ord(data[offset]) == 58):_xaa = True
-    if(_xaa and offset < len(data)):offset += 1
+    if(len(data) > offset and ord(data[offset]) == 58):_xa9 = True
+    if(_xa9 and offset < len(data)):offset += 1
     else:return None
-    _xac = False
+    _xab = False
     while(True):
-      _xab = False
-      if(len(data) > offset and ord(data[offset]) >= 48 and ord(data[offset]) < 58):_xab = True
-      if(not _xab or offset >= len(data)):break
+      _xaa = False
+      if(len(data) > offset and ord(data[offset]) >= 48 and ord(data[offset]) < 58):_xaa = True
+      if(not _xaa or offset >= len(data)):break
       offset += 1
-      _xac=True
-    if(not _xac):return None
-    _xad = False
-    if(len(data) > offset and ord(data[offset]) == 93):_xad = True
-    if(_xad and offset < len(data)):offset += 1
+      _xab=True
+    if(not _xab):return None
+    _xac = False
+    if(len(data) > offset and ord(data[offset]) == 93):_xac = True
+    if(_xac and offset < len(data)):offset += 1
     else:return None
     return Node.fromRange(data,"regRange",loc,offset)
   def _regTillLine22(data:str,loc:Location):
     offset = loc.idx
     while(True):
-      _xae = False
-      if(len(data) > offset and ord(data[offset]) == 10):_xae = True
-      _xae = not _xae
-      if(not _xae or offset >= len(data)):break
+      _xad = False
+      if(len(data) > offset and ord(data[offset]) == 10):_xad = True
+      _xad = not _xad
+      if(not _xad or offset >= len(data)):break
       offset += 1
-    _xaf = False
-    if(len(data) > offset and ord(data[offset]) == 10):_xaf = True
-    if(_xaf and offset < len(data)):offset += 1
+    _xae = False
+    if(len(data) > offset and ord(data[offset]) == 10):_xae = True
+    if(_xae and offset < len(data)):offset += 1
     else:return None
     return Node.fromRange(data,"regTillLine",loc,offset)
   def _regWord23(data:str,loc:Location):
     offset = loc.idx
-    _xb1 = False
+    _xb0 = False
     while(True):
-      _xb0 = False
-      if(len(data) > offset and ord(data[offset]) >= 9 and ord(data[offset]) < 11):_xb0 = True
-      elif(len(data) > offset and ord(data[offset]) == 13):_xb0 = True
-      elif(len(data) > offset and ord(data[offset]) == 32):_xb0 = True
-      _xb0 = not _xb0
-      if(not _xb0 or offset >= len(data)):break
+      _xaf = False
+      if(len(data) > offset and ord(data[offset]) >= 9 and ord(data[offset]) < 11):_xaf = True
+      elif(len(data) > offset and ord(data[offset]) == 13):_xaf = True
+      elif(len(data) > offset and ord(data[offset]) == 32):_xaf = True
+      _xaf = not _xaf
+      if(not _xaf or offset >= len(data)):break
       offset += 1
-      _xb1=True
-    if(not _xb1):return None
+      _xb0=True
+    if(not _xb0):return None
     return Node.fromRange(data,"regWord",loc,offset)
   def _HeadDate24(data:str,loc:Location):
     node = Node(data,loc,"HeadDate")
-    _xb2 = Parser._regSDate(data,loc)
+    _xb1 = Parser._regSDate(data,loc)
+    if(not _xb1):return None
+    if(_xb1):loc.update(_xb1.loc)
+    _xb2 = Parser._regRegion(data,loc)
+    if(_xb2):node.addChild(_xb2)
     if(not _xb2):return None
     if(_xb2):loc.update(_xb2.loc)
-    _xb3 = Parser._regRegion(data,loc)
-    if(_xb3):node.addChild(_xb3)
+    _xb3 = Parser._regSEnd(data,loc)
     if(not _xb3):return None
     if(_xb3):loc.update(_xb3.loc)
-    _xb4 = Parser._regSEnd(data,loc)
-    if(not _xb4):return None
-    if(_xb4):loc.update(_xb4.loc)
     node.setRange(loc)
     return node
   def _HeadVersion25(data:str,loc:Location):
     node = Node(data,loc,"HeadVersion")
-    _xb5 = Parser._regSVersion(data,loc)
+    _xb4 = Parser._regSVersion(data,loc)
+    if(not _xb4):return None
+    if(_xb4):loc.update(_xb4.loc)
+    _xb5 = Parser._regRegion(data,loc)
+    if(_xb5):node.addChild(_xb5)
     if(not _xb5):return None
     if(_xb5):loc.update(_xb5.loc)
-    _xb6 = Parser._regRegion(data,loc)
-    if(_xb6):node.addChild(_xb6)
+    _xb6 = Parser._regSEnd(data,loc)
     if(not _xb6):return None
     if(_xb6):loc.update(_xb6.loc)
-    _xb7 = Parser._regSEnd(data,loc)
-    if(not _xb7):return None
-    if(_xb7):loc.update(_xb7.loc)
     node.setRange(loc)
     return node
   def _HeadComment26(data:str,loc:Location):
     node = Node(data,loc,"HeadComment")
-    _xb8 = Parser._regSComment(data,loc)
+    _xb7 = Parser._regSComment(data,loc)
+    if(not _xb7):return None
+    if(_xb7):loc.update(_xb7.loc)
+    _xb8 = Parser._regRegion(data,loc)
+    if(_xb8):node.addChild(_xb8)
     if(not _xb8):return None
     if(_xb8):loc.update(_xb8.loc)
-    _xb9 = Parser._regRegion(data,loc)
-    if(_xb9):node.addChild(_xb9)
+    _xb9 = Parser._regSEnd(data,loc)
     if(not _xb9):return None
     if(_xb9):loc.update(_xb9.loc)
-    _xba = Parser._regSEnd(data,loc)
-    if(not _xba):return None
-    if(_xba):loc.update(_xba.loc)
     node.setRange(loc)
     return node
   def _HeadTimescale27(data:str,loc:Location):
     node = Node(data,loc,"HeadTimescale")
-    _xbb = Parser._regSTimescale(data,loc)
+    _xba = Parser._regSTimescale(data,loc)
+    if(not _xba):return None
+    if(_xba):loc.update(_xba.loc)
+    _xbb = Parser._regRegion(data,loc)
+    if(_xbb):node.addChild(_xbb)
     if(not _xbb):return None
     if(_xbb):loc.update(_xbb.loc)
-    _xbc = Parser._regRegion(data,loc)
-    if(_xbc):node.addChild(_xbc)
+    _xbc = Parser._regSEnd(data,loc)
     if(not _xbc):return None
     if(_xbc):loc.update(_xbc.loc)
-    _xbd = Parser._regSEnd(data,loc)
-    if(not _xbd):return None
-    if(_xbd):loc.update(_xbd.loc)
     node.setRange(loc)
     return node
   def _HeadEndDef28(data:str,loc:Location):
     node = Node(data,loc,"HeadEndDef")
-    _xbe = Parser._regSEnddefinitions(data,loc)
+    _xbd = Parser._regSEnddefinitions(data,loc)
+    if(not _xbd):return None
+    if(_xbd):loc.update(_xbd.loc)
+    _xbe = Parser._regSpace(data,loc)
     if(not _xbe):return None
     if(_xbe):loc.update(_xbe.loc)
-    _xbf = Parser._regSpace(data,loc)
+    _xbf = Parser._regSEnd(data,loc)
     if(not _xbf):return None
     if(_xbf):loc.update(_xbf.loc)
-    _xc0 = Parser._regSEnd(data,loc)
-    if(not _xc0):return None
-    if(_xc0):loc.update(_xc0.loc)
     node.setRange(loc)
     return node
   def _HeadDumpAll29(data:str,loc:Location):
     node = Node(data,loc,"HeadDumpAll")
-    _xc1 = Parser._regSDumpall(data,loc)
+    _xc0 = Parser._regSDumpall(data,loc)
+    if(not _xc0):return None
+    if(_xc0):loc.update(_xc0.loc)
+    _xc1 = Parser._regSpace(data,loc)
     if(not _xc1):return None
     if(_xc1):loc.update(_xc1.loc)
-    _xc2 = Parser._regSpace(data,loc)
+    _xc2 = Parser._regSEnd(data,loc)
     if(not _xc2):return None
     if(_xc2):loc.update(_xc2.loc)
-    _xc3 = Parser._regSEnd(data,loc)
+    _xc3 = Parser._regSpace(data,loc)
     if(not _xc3):return None
     if(_xc3):loc.update(_xc3.loc)
-    _xc4 = Parser._regSpace(data,loc)
+    _xc4 = Parser._HeadDump(data,loc)
+    if(_xc4):node.addChildrenOf(_xc4)
     if(not _xc4):return None
+    node.name = _xc4.name
     if(_xc4):loc.update(_xc4.loc)
-    _xc5 = Parser._HeadDump(data,loc)
-    if(_xc5):node.addChildrenOf(_xc5)
-    if(not _xc5):return None
-    node.name = _xc5.name
-    if(_xc5):loc.update(_xc5.loc)
     node.setRange(loc)
     return node
   def _HeadDump30(data:str,loc:Location):
     node = Node(data,loc,"HeadDump")
+    _xc5 = Parser._HeadTimeStep(data,loc)
+    if(_xc5):node.addChild(_xc5)
+    if(not _xc5):return None
+    if(_xc5):loc.update(_xc5.loc)
     _xc6 = Parser._HeadTimeStep(data,loc)
     if(_xc6):node.addChild(_xc6)
-    if(not _xc6):return None
     if(_xc6):loc.update(_xc6.loc)
     _xc7 = Parser._HeadTimeStep(data,loc)
     if(_xc7):node.addChild(_xc7)
     if(_xc7):loc.update(_xc7.loc)
-    _xc8 = Parser._HeadTimeStep(data,loc)
-    if(_xc8):node.addChild(_xc8)
+    _xc8 = Parser._HeadDump(data,loc)
+    if(_xc8):node.addChildrenOf(_xc8)
     if(_xc8):loc.update(_xc8.loc)
-    _xc9 = Parser._HeadDump(data,loc)
-    if(_xc9):node.addChildrenOf(_xc9)
-    if(_xc9):loc.update(_xc9.loc)
     node.setRange(loc)
     return node
   def _HeadDump31(data:str,loc:Location):
     node = Node(data,loc,"HeadDump")
-    _xca = Parser._regSStatement(data,loc)
-    if(not _xca):return None
+    _xc9 = Parser._regSStatement(data,loc)
+    if(not _xc9):return None
+    if(_xc9):loc.update(_xc9.loc)
+    _xca = Parser._HeadTimeStep(data,loc)
+    if(_xca):node.addChild(_xca)
     if(_xca):loc.update(_xca.loc)
     _xcb = Parser._HeadTimeStep(data,loc)
     if(_xcb):node.addChild(_xcb)
     if(_xcb):loc.update(_xcb.loc)
-    _xcc = Parser._HeadTimeStep(data,loc)
-    if(_xcc):node.addChild(_xcc)
+    _xcc = Parser._HeadDump(data,loc)
+    if(_xcc):node.addChildrenOf(_xcc)
     if(_xcc):loc.update(_xcc.loc)
-    _xcd = Parser._HeadDump(data,loc)
-    if(_xcd):node.addChildrenOf(_xcd)
-    if(_xcd):loc.update(_xcd.loc)
     node.setRange(loc)
     return node
   def _HeadTimeStep32(data:str,loc:Location):
     node = Node(data,loc,"HeadTimeStep")
-    _xce = Parser._regTimestep(data,loc)
-    if(_xce):node.addChild(_xce)
+    _xcd = Parser._regTimestep(data,loc)
+    if(_xcd):node.addChild(_xcd)
+    if(not _xcd):return None
+    if(_xcd):loc.update(_xcd.loc)
+    _xce = Parser._regSpace(data,loc)
     if(not _xce):return None
     if(_xce):loc.update(_xce.loc)
-    _xcf = Parser._regSpace(data,loc)
+    _xcf = Parser._BodyTimeStep(data,loc)
+    if(_xcf):node.addChild(_xcf)
     if(not _xcf):return None
     if(_xcf):loc.update(_xcf.loc)
-    _xd0 = Parser._BodyTimeStep(data,loc)
-    if(_xd0):node.addChild(_xd0)
-    if(not _xd0):return None
-    if(_xd0):loc.update(_xd0.loc)
     node.setRange(loc)
     return node
   def _BodyTimeStep33(data:str,loc:Location):
     node = Node(data,loc,"BodyTimeStep")
-    _xd1 = Parser._BodyDump(data,loc)
-    if(_xd1):node.addChild(_xd1)
+    _xd0 = Parser._BodyDump(data,loc)
+    if(_xd0):node.addChild(_xd0)
+    if(not _xd0):return None
+    if(_xd0):loc.update(_xd0.loc)
+    _xd1 = Parser._regSpace(data,loc)
     if(not _xd1):return None
     if(_xd1):loc.update(_xd1.loc)
-    _xd2 = Parser._regSpace(data,loc)
-    if(not _xd2):return None
+    _xd2 = Parser._BodyDump(data,loc)
+    if(_xd2):node.addChild(_xd2)
     if(_xd2):loc.update(_xd2.loc)
-    _xd3 = Parser._BodyDump(data,loc)
-    if(_xd3):node.addChild(_xd3)
+    _xd3 = Parser._regSpace(data,loc)
+    if(not _xd3):return None
     if(_xd3):loc.update(_xd3.loc)
-    _xd4 = Parser._regSpace(data,loc)
-    if(not _xd4):return None
+    _xd4 = Parser._BodyDump(data,loc)
+    if(_xd4):node.addChild(_xd4)
     if(_xd4):loc.update(_xd4.loc)
-    _xd5 = Parser._BodyDump(data,loc)
-    if(_xd5):node.addChild(_xd5)
+    _xd5 = Parser._regSpace(data,loc)
+    if(not _xd5):return None
     if(_xd5):loc.update(_xd5.loc)
-    _xd6 = Parser._regSpace(data,loc)
-    if(not _xd6):return None
+    _xd6 = Parser._BodyTimeStep(data,loc)
+    if(_xd6):node.addChildrenOf(_xd6)
     if(_xd6):loc.update(_xd6.loc)
-    _xd7 = Parser._BodyTimeStep(data,loc)
-    if(_xd7):node.addChildrenOf(_xd7)
-    if(_xd7):loc.update(_xd7.loc)
     node.setRange(loc)
     return node
   def _BodyTimeStep34(data:str,loc:Location):
     node = Node(data,loc,"BodyTimeStep")
-    _xd8 = Parser._BodyDumpIgnore(data,loc)
+    _xd7 = Parser._BodyDumpIgnore(data,loc)
+    if(not _xd7):return None
+    if(_xd7):loc.update(_xd7.loc)
+    _xd8 = Parser._regSpace(data,loc)
     if(not _xd8):return None
     if(_xd8):loc.update(_xd8.loc)
-    _xd9 = Parser._regSpace(data,loc)
-    if(not _xd9):return None
+    _xd9 = Parser._BodyDump(data,loc)
+    if(_xd9):node.addChild(_xd9)
     if(_xd9):loc.update(_xd9.loc)
-    _xda = Parser._BodyDump(data,loc)
-    if(_xda):node.addChild(_xda)
+    _xda = Parser._regSpace(data,loc)
+    if(not _xda):return None
     if(_xda):loc.update(_xda.loc)
-    _xdb = Parser._regSpace(data,loc)
-    if(not _xdb):return None
+    _xdb = Parser._BodyDump(data,loc)
+    if(_xdb):node.addChild(_xdb)
     if(_xdb):loc.update(_xdb.loc)
-    _xdc = Parser._BodyDump(data,loc)
-    if(_xdc):node.addChild(_xdc)
+    _xdc = Parser._regSpace(data,loc)
+    if(not _xdc):return None
     if(_xdc):loc.update(_xdc.loc)
-    _xdd = Parser._regSpace(data,loc)
-    if(not _xdd):return None
+    _xdd = Parser._BodyTimeStep(data,loc)
+    if(_xdd):node.addChildrenOf(_xdd)
     if(_xdd):loc.update(_xdd.loc)
-    _xde = Parser._BodyTimeStep(data,loc)
-    if(_xde):node.addChildrenOf(_xde)
-    if(_xde):loc.update(_xde.loc)
     node.setRange(loc)
     return node
   def _BodyDump35(data:str,loc:Location):
     node = Node(data,loc,"BodyDump")
-    _xdf = Parser._regBinary(data,loc)
-    if(_xdf):node.addChild(_xdf)
+    _xde = Parser._regBinary(data,loc)
+    if(_xde):node.addChild(_xde)
+    if(not _xde):return None
+    if(_xde):loc.update(_xde.loc)
+    _xdf = Parser._regSpace(data,loc)
     if(not _xdf):return None
     if(_xdf):loc.update(_xdf.loc)
     _xe0 = Parser._regWord(data,loc)

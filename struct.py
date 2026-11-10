@@ -29,9 +29,10 @@ class WaveMap:
     def setAlias(self,other:WaveMap):
         self.names += other.names
         # Other things could be different.....
-    def makeValid(self,data:WaveData):
+    def addTo(self,data:WaveData):
         while(len(data.value) < self.size):
-            data.value = data.value[0] + data.value
+            data.value = "0" + data.value
+        self.assign.append(data)
 
 class ScopeInfo:
     __slots__ = ("date","version","timescale")
@@ -87,14 +88,14 @@ class ScopeWave:
 
     def _parseDump(self,node:pars.Node):
         for timeNode in node.children:
-            wt = WaveTime(timeNode.children[0].getRaw()[1:])
+            wt = WaveTime(int(timeNode.children[0].getRaw()[1:]))
             self.stamps.append(wt)
             for dumpNode in timeNode.children[1].children:
                 wd = WaveData(wt,
                               self._parseValue(dumpNode.children[0].getRaw()),
                               dumpNode.children[1].getRaw())
                 wt.append(wd)
-                self.map[wd.name].makeValid(wd)
+                self.map[wd.name].addTo(wd)
 
     def _parseValue(self,data:str)->list(str):
         if(data[0] in "01xz"):
@@ -107,13 +108,16 @@ class ScopeWave:
         data += " ".join([".".join(x) for x in wire.names])
         return data
 
+def doParse(data)->ScopeWave:
+    lp = pars.Parser.parse(data)
+    #print(lp.print())
+    sc = ScopeWave(lp)
+    return sc
 
 if __name__ == "__main__":
     file = sys.argv[1]
     with open(file,"r")as fptr:
         data = fptr.read()
-    lp = pars.Parser.parse(data)
-    #print(lp.print())
-    sc = ScopeWave(lp)
+    sc = doParse(data)
     print(sc)
 
