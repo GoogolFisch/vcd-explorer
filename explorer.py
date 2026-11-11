@@ -13,6 +13,7 @@ oldflags = fcntl.fcntl(fd, fcntl.F_GETFL)
 fcntl.fcntl(fd, fcntl.F_SETFL, oldflags | os.O_NONBLOCK)
 
 def canCancelInput(prompt:str=":",history=list(),complete=None)->str|None:
+    print(end="\x1b[K")#]
     prefix = ""
     suffix = ""
     print(end=prompt,flush=True)
@@ -69,7 +70,33 @@ def makeAsLength(data,length):
         data = " " + data
     return data
 
+def fuzzyFindScore(target:str,pattern:str)->int:
+    if(len(pattern) < 1):return 0
+    ti = pi = 0
+    matches = list()
+    while(ti < len(target) and pi < len(pattern)):
+        if(target[ti] == pattern[pi]):
+            matches.append(ti)
+            pi += 1
+        elif(pattern[pi] == "*"):
+            break
+        ti += 1
+    if(pi < len(pattern) and pattern[pi] != "*"):return 0
+    if(len(matches) == 0):return 0
+    score = 1000
+    score -= matches[0] * 5
+    for idx in range(1,len(matches)):
+        gap = matches[idx] - matches[idx - 1] - 1
+        score -= gap * 8
+    score -= max(0,len(target) - len(pattern)) * 0.5
+    return score
+
 def bin2ColorHex(bin,length:int=128):
+    if(len(bin) < 2):
+        outp = bin
+        while(len(outp) < length):
+            outp = " " + outp
+        return outp
     lookup = "0123456789ABCDEF"
     outp = ""
     counter = 0
@@ -96,6 +123,21 @@ def bin2ColorHex(bin,length:int=128):
         myLength += 1
     return outp
 
+def fuzzeSelectMaxScore(pattern,data:iter)->list:
+    matching = list()
+    direktMatch = False
+    score = 0
+    for x in data:
+        if(x == wireName):direktMatch = True
+        newScore = fuzzyFindScore(x,pattern)
+        if(newScore > score):
+            score = newScore
+            matching.clear()
+        if(newScore == score):
+            matching.append(x)
+    if(direktMatch):
+        return [pattern]
+    return matching
 
 
 class Position:
@@ -137,25 +179,62 @@ class App:
         if(command is None):return
         if(command.startswith("o ")):
             self.openNewFile(command[2:])
+        if(command.isnumeric()):
+            self.position.x = int(command)
+        if(command == "list" or command.startswith("list ")):
+            expr = command[5:]
+            for x in self.data.longMap:
+                if(x.startswith(expr)):
+                    print(x)
 
     def getAddWire(self):
         if(self.data is None):
             self.error = "You need to open a file!"
             return
         def _getAddWire(pre:str,suf:str)->(str,str):
-            if(pre.startswith(".")):
-                pup = pre[1:]
-                found = pre
-                length = 999
-                for x in self.data.longMap:
-                    if(length > len(x) and x.endswith(pup)):
-                        found = x
-                        length = len(x)
-                return found,suf
-            return pre,suf
+            if(len(pre) == 0):return pre,suf
+            prepend = ""
+            if(pre[0] == "*"):
+                prepend = "*"
+                pre = pre[1:]
+            score = 0
+            found = pre
+            for x in self.data.longMap:
+                newScore = fuzzyFindScore(x,pre)
+                if(newScore > score):
+                    score = newScore
+                    found = x
+            return prepend+found,suf
         gotoPlace(1,1)
         wireName = canCancelInput("+",complete=_getAddWire)
-        self.wires.append(tuple(wireName.split(".")))
+        if(wireName is None):return
+        listing = self.wires
+        if(wireName[0] == "*"):
+            listing = self.staticWires
+            wireName = wireName[1:]
+        matching = list()
+        matchBlock = list()
+        direktMatch = False
+        score = 0
+        for x,baseWire in self.data.longMap.items():
+            if(x == wireName):direktMatch = True
+            newScore = fuzzyFindScore(x,wireName)
+            if(newScore > score):
+                score = newScore
+                matchBlock.clear()
+                matching.clear()
+            if(newScore == score):
+                if(baseWire.short in matchBlock):
+                    continue
+                matching.append(x)
+                matchBlock.append(baseWire.short)
+        matching = fuzzeSelectMaxScore(wireName,self.data.longMap)
+        #TODO
+        if(direktMatch):
+            listing.append(tuple(wireName.split(".")))
+        else:
+            for x in matching:
+                listing.append(tuple(x.split(".")))
 
     def run(self,input:str):
         if(len(input) == 0):return True
@@ -185,6 +264,8 @@ class App:
             self.position.y = 0
         if(self.position.x > self.data.stamps[-1].stamp):
             self.position.x = self.data.stamps[-1].stamp
+        if(self.position.y > len(self.wires)):
+            self.position.y = len(self.wires)
 
     def redraw(self):
         tsize = os.get_terminal_size()
@@ -201,6 +282,10 @@ class App:
                   f"{self.data.info.version}  {self.data.info.timescale}  "
                   f"{self.data.stamps[-1].stamp}")
         goDown += 1
+        gotoPlace(1,goDown)
+        print(end=" " * App.nameLength)
+        self.drawTimeStamp(tsize)
+        goDown += 1
         for wire in self.staticWires:
             if(goDown > tsize.lines):return
             gotoPlace(1,goDown)
@@ -212,11 +297,16 @@ class App:
             if(idx < self.position.y):continue
             if(goDown > tsize.lines):return
             gotoPlace(1,goDown)
-            print(end=f"{makeAsLength(wire[-1],App.nameLength - 1)} ")
+            #print(end=f"{makeAsLength(wire[-1],App.nameLength - 1)} ")
+            print(end=f"{makeAsLength(".".join(wire)[-App.nameLength + 1:],App.nameLength - 1)} ")
             self.drawForWire(wire,tsize)
             goDown += 1
 
         print(end="",flush=True)
+
+    def drawTimeStamp(self,tsize:os.terminal_size):
+        for stamp in range(self.position.x,self.position.x + (tsize.columns - App.nameLength)//5):
+            print(end=f" {makeAsLength(str(stamp),4)}")
 
     def drawForWire(self,wire:tuple,tsize:os.terminal_size):
         nameWire = ".".join(wire)
@@ -230,6 +320,7 @@ class App:
             while(idx < len(wireBase.assign) and wireBase.assign[idx].time.stamp <= stamp):
                 idx += 1
             if(idx > len(wireBase.assign)):break
+            if(idx == 0):continue
             base = wireBase.assign[idx-1]
             if(oldBase is not base):
                 print(end="|")
