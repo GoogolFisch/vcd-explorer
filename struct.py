@@ -103,9 +103,12 @@ class ScopeWave:
         return data[1:]
 
     def __str__(self):
-        data = f"{self.info}-{self.stamps[-1].stamp}\n"
-        wire = list(self.map.values())[0]
-        data += " ".join([".".join(x) for x in wire.names])
+        if(len(self.stamps) > 0):
+            data = f"{self.info}-{self.stamps[-1].stamp}\n"
+            wire = list(self.map.values())[0]
+            data += " ".join([".".join(x) for x in wire.names])
+        else:
+            data = f"{self.info}-???"
         return data
 
 def doParse(data)->ScopeWave:

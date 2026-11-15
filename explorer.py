@@ -2,6 +2,8 @@
 
 import struct
 import termios, fcntl, sys, os
+import time
+deltaSleep = 0.01
 fd = sys.stdin.fileno()
 
 oldterm = termios.tcgetattr(fd)
@@ -12,12 +14,19 @@ termios.tcsetattr(fd, termios.TCSANOW, newattr)
 oldflags = fcntl.fcntl(fd, fcntl.F_GETFL)
 fcntl.fcntl(fd, fcntl.F_SETFL, oldflags | os.O_NONBLOCK)
 
+def awaitInput():
+    while True:
+        time.sleep(deltaSleep)
+        c = sys.stdin.read(16)
+        if(len(c) > 0):
+            break
 def canCancelInput(prompt:str=":",history=list(),complete=None)->str|None:
     print(end="\x1b[K")#]
     prefix = ""
     suffix = ""
     print(end=prompt,flush=True)
     while True:
+        time.sleep(deltaSleep)
         c = sys.stdin.read(16)
         if(len(c) == 0):continue
         elif(c == "\n"):break
@@ -88,7 +97,7 @@ def fuzzyFindScore(target:str,pattern:str)->int:
     for idx in range(1,len(matches)):
         gap = matches[idx] - matches[idx - 1] - 1
         score -= gap * 8
-    score -= max(0,len(target) - len(pattern)) * 0.5
+    score -= max(0,ti - pi) * 0.5
     return score
 
 def bin2ColorHex(bin,length:int=128):
@@ -102,38 +111,47 @@ def bin2ColorHex(bin,length:int=128):
     counter = 0
     myLength = 0
     value = 0
+    rCount = 0
     isRed = "\x1b[0m"#]
     while len(bin) > 0 and length > myLength:
         ch = bin[-1]
         bin = bin[:-1]
         #
         value += (ch == "1") << (counter % 4)
-        if(ch not in "01"):isRed = "\x1b[31m"#]
+        if(ch not in "01"):
+            isRed = "\x1b[31m"#]
+            rCount += 1
         counter += 1
         #
         if(counter == 4):
-            myLength += 1
-            outp = isRed + lookup[value] + outp
+            if(rCount >= counter):
+                outp = "x" + outp
+            else:
+                myLength += 1
+                outp = isRed + lookup[value] + outp
             counter = value = 0
     if(counter > 0):
-        outp = lookup[value] + outp
-        myLength += 1
+        if(rCount >= counter):
+            outp = "x" + outp
+        else:
+            outp = isRed + lookup[value] + outp
+            myLength += 1
     while(myLength < length):
         outp = " " + outp
         myLength += 1
     return outp
 
-def fuzzeSelectMaxScore(pattern,data:iter)->list:
+def fuzzeSelectMaxScore(pattern,data:iter,doDelete:bool=True)->list:
     matching = list()
     direktMatch = False
     score = 0
     for x in data:
-        if(x == wireName):direktMatch = True
+        if(x == pattern):direktMatch = True
         newScore = fuzzyFindScore(x,pattern)
-        if(newScore > score):
+        if(newScore > score and doDelete):
             score = newScore
             matching.clear()
-        if(newScore == score):
+        if(newScore >= score):
             matching.append(x)
     if(direktMatch):
         return [pattern]
@@ -149,7 +167,7 @@ class Position:
 
 class App:
     nameLength = 9
-    __slots__ = ("data","fileName","wires","staticWires","position","error")
+    __slots__ = ("data","fileName","wires","staticWires","position","error","dataStride")
     def __init__(self):
         self.data = None
         self.fileName = ""
@@ -157,6 +175,7 @@ class App:
         self.staticWires = list()
         self.position = Position(0,0)
         self.error = None
+        self.dataStride = 4
         self.redraw()
 
     def openNewFile(self,fname):
@@ -183,9 +202,11 @@ class App:
             self.position.x = int(command)
         if(command == "list" or command.startswith("list ")):
             expr = command[5:]
-            for x in self.data.longMap:
-                if(x.startswith(expr)):
-                    print(x)
+            for x in fuzzeSelectMaxScore(expr,self.data.longMap,False):
+                print(x)
+            awaitInput()
+        if(command == "q"):
+            sys.exit(0)
 
     def getAddWire(self):
         if(self.data is None):
@@ -306,7 +327,7 @@ class App:
 
     def drawTimeStamp(self,tsize:os.terminal_size):
         for stamp in range(self.position.x,self.position.x + (tsize.columns - App.nameLength)//5):
-            print(end=f" {makeAsLength(str(stamp),4)}")
+            print(end=f" {makeAsLength(str(stamp),self.dataStride)}")
 
     def drawForWire(self,wire:tuple,tsize:os.terminal_size):
         nameWire = ".".join(wire)
@@ -316,7 +337,7 @@ class App:
             return
         idx = 0
         oldBase = None
-        for stamp in range(self.position.x,self.position.x + (tsize.columns - App.nameLength)//5):
+        for stamp in range(self.position.x,self.position.x + (tsize.columns - App.nameLength)//(self.dataStride + 1)):
             while(idx < len(wireBase.assign) and wireBase.assign[idx].time.stamp <= stamp):
                 idx += 1
             if(idx > len(wireBase.assign)):break
@@ -326,7 +347,7 @@ class App:
                 print(end="|")
             else:
                 print(end=" ")
-            print(end=bin2ColorHex(base.value,4))
+            print(end=bin2ColorHex(base.value,self.dataStride))
             oldBase = base
 
 
@@ -339,7 +360,8 @@ try:
     a.redraw()
     while 1:
         try:
-            c = sys.stdin.read(1)
+            time.sleep(deltaSleep)
+            c = sys.stdin.read(16)
             if(not a.run(c)):
                 print("Got character", repr(c))
         except IOError: pass

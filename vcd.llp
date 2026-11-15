@@ -38,17 +38,19 @@ HeadDumpAll   > regSDumpall. regSpace. regSEnd. regSpace. HeadDump*#
 HeadDump      > HeadTimeStep   HeadTimeStep? HeadTimeStep? HeadDump*?
 HeadDump      > regSStatement. HeadTimeStep? HeadTimeStep? HeadDump*?
 
-HeadTimeStep  > regTimestep     regSpace.                     BodyTimeStep
-BodyTimeStep  > BodyDump        regSpace. BodyDump? regSpace. BodyDump? regSpace. BodyTimeStep*?
-BodyTimeStep  > BodyDumpIgnore. regSpace. BodyDump? regSpace. BodyDump? regSpace. BodyTimeStep*?
+HeadTimeStep  > regTimestep     regSpace. BodyTimeStep
+BodyTimeStep  > BodyTimeStepL*+
+BodyTimeStepL > BodyDump        regSpace.
+BodyTimeStepL > BodyDumpIgnore. regSpace.
 
 BodyDump       > regBinary regSpace. regWord
 BodyDump       > charBinValue        regWord
 BodyDumpIgnore > regSStatement.      regSpace.
 
 HeadScope     > regSScope. regSpace. ScopeModule regSEnd. regSpace. BodyScope? regSUpscope. regSpace. regSEnd.
-BodyScope     > regSVar. regSpace. ScopeNewVar regSpace. regSEnd. regSpace. BodyScope*?
-BodyScope     > HeadScope regSpace. BodyScope*?
+BodyScope     > BodyScopeLow*+
+BodyScopeLow  > regSVar. regSpace. ScopeNewVar regSpace. regSEnd. regSpace.
+BodyScopeLow  > HeadScope regSpace.
 
 ScopeModule   > regWord regSpace. regWord regSpace.
 ScopeNewVar > regWord regSpace. regNumber regSpace. regWord regSpace. regWord regSpace. regRange? regSpace.?
