@@ -144,7 +144,7 @@ def bin2ColorHex(bin,length:int=128):
 def fuzzeSelectMaxScore(pattern,data:iter,doDelete:bool=True)->list:
     matching = list()
     direktMatch = False
-    score = 0
+    score = 1
     for x in data:
         if(x == pattern):direktMatch = True
         newScore = fuzzyFindScore(x,pattern)
